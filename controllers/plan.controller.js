@@ -36,8 +36,7 @@ exports.findAll = (req, res) => {
     Plans.findAll({ where: condition })
         .then(data => {
             res.send(data);
-        })
-        .catch(err => {
+        }).catch(err => {
             res.status(500).send({
                 message:
                     err.message || "Some error occurred while retrieving plans."
@@ -45,5 +44,95 @@ exports.findAll = (req, res) => {
         });
 };
 
+exports.findOne = (req, res) => {
+    const id = req.params.id;
+    Plans.findByPk(id)
+        .then(data => {
+            if (data) {
+                res.send(data);
+            } else {
+                res.status(404).send({
+                    message: `Cannot find Plan with id = ${id}.`
+                });
+            }
+        }).catch(err => {
+            res.status(500).send({
+                message: "Error retrieving Plan with id=" + id
+            });
+        });
+};
 
 
+exports.update = (req, res) => {
+    const id = req.params.id;
+    Plans.update(req.body, {
+        where: { id: id }
+    })
+        .then(num => {
+            if (num == 1) {
+                res.send({
+                    message: "Plan was updated successfully."
+                });
+            } else {
+                res.send({
+                    message: `Cannot update Plan with id=${id}. Maybe Plan was not found or req.body is empty!`
+                });
+            }
+        }).catch(err => {
+            res.status(500).send({
+                message: "Error updating Plan with id=" + id
+            });
+        });
+};
+
+exports.delete = (req, res) => {
+    const id = req.params.id;
+    Plans.destroy({
+        where: { id: id }
+    })
+        .then(num => {
+            if (num == 1) {
+                res.send({
+                    message: "Plan was deleted successfully!"
+                });
+            } else {
+                res.send({
+                    message: `Cannot delete Plan with id=${id}. Maybe Plan was not found!`
+                });
+            }
+        }).catch(err => {
+            res.status(500).send({
+                message: "Could not delete Plan with id=" + id
+            });
+        });
+};
+
+exports.deleteAll = (req, res) => {
+    Plans.destroy({
+        where: {},
+        truncate: false
+    })
+        .then(nums => {
+            res.send({
+                message: `${nums} Plans were deleted successfully!})`
+            }).catch(err => {
+                res.status(500).send({
+                    message:
+                        err.message || "Some error occurred while removing all plans."
+                });
+            });
+        });
+};
+
+
+exports.findAllCompleted = (req, res) => {
+    Plans.findAll({ where: { completed: true } })
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Some error occurred while retrieving Plans."
+            });
+        });
+};
